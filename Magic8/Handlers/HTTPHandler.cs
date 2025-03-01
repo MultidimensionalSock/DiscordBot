@@ -6,7 +6,7 @@ namespace Magic8
 {
     public class HTTPHandler
     {
-        public static HttpClient HttpClient { get; private set; }
+        public static HttpClient? HttpClient { get; private set; }
 
         public HTTPHandler(HttpClient httpClient)
         {

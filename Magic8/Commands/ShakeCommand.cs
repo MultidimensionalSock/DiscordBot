@@ -11,8 +11,8 @@ namespace Magic8.Commands
 {
     public class ShakeCommand : Command
     {
-        public new string Id;
-        public new bool _guildCommand { get; private set; }
+        public new string? Id;
+        public new bool GuildCommand { get; private set; }
         public new string Name = "shake";
         public new CommandType Type = CommandType.CHAT_INPUT;
         public new string Description = "Shake the magic ball";
@@ -64,16 +64,12 @@ namespace Magic8.Commands
                 }
             }), Encoding.UTF8, "application/json");
 
-            RespondToInteraction(interaction.Id, interaction.ContinuationToken, jsonContent);
-
-            //Command.CreateMessage(channelId, JsonSerializer.Serialize(body));
+            await RespondToInteraction(interaction.Id, interaction.ContinuationToken, jsonContent);
         }
 
         public override async Task<HttpResponseMessage> AddCommand(Command command, string guildId = "-1")
         {
             string URL;
-            CommandData data = null;
-            //JsonSerializer.Deserialize<InteractionObject>(d);
             using StringContent jsonContent = new(JsonSerializer.Serialize
                 (
                 new 

@@ -13,7 +13,7 @@ namespace Magic8
         private Uri? _resumeGatewayUrl;
         public static ClientWebSocket WebSocketClient { get; private set; }
         private int _heartbeatInterval = 10;
-        private Timer _heartbeatTimer;
+        private Timer? _heartbeatTimer;
         private bool _heartbeatResponse = true;
         private int _lastSequenceNumber = 0;
         private bool _closedMessageRecieved = false;
@@ -55,11 +55,10 @@ namespace Magic8
         public async Task Reconnect()
         {
             Console.WriteLine("Reconnecting to web socket");
-            //TODO: this isnt working
             await WebSocketClient.ConnectAsync(_resumeGatewayUrl, CancellationToken.None);
             _ = Task.Run(RecieveMessages);
-            _resumeSuccessful = false;
-            Console.WriteLine("Reonnected");
+            _resumeSuccessful = true;
+            Console.WriteLine("Reconnected");
 
             await SendMessage(GatewayOpcodes.RESUME);
         }
@@ -74,6 +73,7 @@ namespace Magic8
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
                     await HandleClose(result);
+                    continue;
                 }
                 else
                 {
@@ -152,6 +152,7 @@ namespace Magic8
                     BotDetails botDetails = JsonSerializer.Deserialize<BotDetails>(d);
                     Application.BotRef!.BotDetails = botDetails;
                     Application.BotRef.InitializeCommands();
+                    _resumeGatewayUrl = new Uri( d.GetProperty("resume_gateway_url").GetString());
                     break;
                 case OP0DispatchEvents.RESUMED:
                     _resumeSuccessful = true;
@@ -167,7 +168,7 @@ namespace Magic8
                             interactionObject.Data.Options[0].Value = optionsArray[i].GetProperty("value");
                         }
                     }
-                    Application.BotCommands.Find(c => c.Id == interactionObject.Data.Id).CallCommand(interactionObject);
+                    Application.BotCommands?.Find(c => c.Id == interactionObject.Data.Id)?.CallCommand(interactionObject);
 
                     break;
             }
@@ -225,7 +226,7 @@ namespace Magic8
                         d = new
                         {
                             token = Application.Token,
-                            session_id = Application.BotRef.BotDetails.SessionId,
+                            session_id = Application.BotRef?.BotDetails?.SessionId,
                             seq = _lastSequenceNumber
                         }
                     };
@@ -249,9 +250,7 @@ namespace Magic8
 
         private async Task HandleClose(WebSocketReceiveResult result)
         {
-            //i have no idea if this will convert it but we will see 
-            int s = (int)result.CloseStatus;
-            CloseEvent status = (CloseEvent)s;
+            CloseEvent status = (CloseEvent)result.CloseStatus;
             bool canReconnect = false;
 
             switch (status)

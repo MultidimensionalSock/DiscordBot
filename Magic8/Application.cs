@@ -10,11 +10,11 @@ namespace Magic8
     {
         public BotDetails? BotDetails { get; set; }
         public static Int64 Id;
-        public static string Token;
+        public static string? Token;
 
         public static Application? BotRef;
-        public HTTPHandler HttpHandler;
-        public GatewayHandler GatewayHandler;
+        public HTTPHandler? HttpHandler;
+        public GatewayHandler? GatewayHandler;
 
         public static List<Command> BotCommands = new(); 
 
@@ -42,8 +42,8 @@ namespace Magic8
         // add commands isnt working correctly 
         public async Task AddCommands()
         {
-            List<CommandData> commandData = new List<CommandData>();
-            HttpResponseMessage response = null;
+            List<CommandData>? commandData = new List<CommandData>();
+            HttpResponseMessage? response = null;
 
             try
             {
@@ -67,14 +67,14 @@ namespace Magic8
 
             foreach (Command command in BotCommands) 
             {
-                if (commandData.Count <= 0)
+                if (commandData?.Count <= 0)
                 {
                     response = await command.AddCommand(command);
                 }
                 else
                 {
-                    //this is being set as null
-                    CommandData data = commandData.Find(cd => cd.Name == command.Name);
+                    //this isnt comparing properly
+                    CommandData data = commandData.Find(cd => String.Equals(cd.Name, command.Name));
                     if (data is null)
                     {
                         response = await command.AddCommand(command);
@@ -88,27 +88,22 @@ namespace Magic8
                         //await command.UpdateCommand(data.id);
                     }
                 }
-                using JsonDocument doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+                using JsonDocument doc = JsonDocument.Parse(await response!.Content.ReadAsStringAsync());
                 command.Id = doc.RootElement.GetProperty("id").GetString();
             }
         }
 
-        public void InitializeCommands()
+        public async Task InitializeCommands()
         {
             Type[] commands = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(Command))).ToArray();
+                .Where(t => t.IsSubclassOf(typeof(Command)) && !t.IsAbstract).ToArray();
 
             foreach (Type t in commands)
             {
                 BotCommands.Add(Activator.CreateInstance(t) as Command);
             }
 
-            AddCommands();
-        }
-
-        public void RunCommand()
-        {
-            //needs to be done from events
+            await AddCommands();
         }
     }
 }

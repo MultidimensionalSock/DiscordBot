@@ -11,13 +11,13 @@ namespace Magic8.Commands
 {
     public class Command
     {
-        public string Id;
-        public bool _guildCommand { get; private set; }
+        public string? Id;
+        public bool GuildCommand { get; private set; }
         public string Name = "";
         public CommandType Type;
         public string Description = "";
-        public List<CommandOption> Options;
-        public string DefaultMemberPermissions;
+        public List<CommandOption> Options = new();
+        public string? DefaultMemberPermissions;
         public bool DmPermissions;
         public bool Nsfw;
 
@@ -26,10 +26,10 @@ namespace Magic8.Commands
             Console.WriteLine($"Command {Name} Called");
         }
 
+        //TO DO:
         public static async Task<HttpResponseMessage> GetCommand(string commandId, string guildId = "-1")
         {
             string URL;
-            CommandData data = null;
             if (guildId == "-1")
             {
                 URL = $"https://discord.com/api/v10/applications/{Application.Id}/guilds/{guildId}/commands/{commandId}/permissions";
@@ -42,17 +42,16 @@ namespace Magic8.Commands
             
         }
 
-        //returning bad request 
         public virtual async Task<HttpResponseMessage> AddCommand(Command command, string guildId = "-1")
         {
             string URL;
-            CommandData data = null;
             using StringContent jsonContent = new(JsonSerializer.Serialize(new
             {
                 name = command.Name.ToString(),
                 description = command.Description.ToString()
             }), Encoding.UTF8, "application/json");
             Console.WriteLine(jsonContent);
+
             //change based on whether its a guild command or not
             if (guildId == "-1")
             {
@@ -72,7 +71,7 @@ namespace Magic8.Commands
         {
             string URL = $"https://discord.com/api/v10/interactions/{interactionId}/{interactionToken}/callback";
 
-            HTTPHandler.SendRequest(HttpMethod.Post, URL, content);
+            await HTTPHandler.SendRequest(HttpMethod.Post, URL, content);
         }
 
     }
