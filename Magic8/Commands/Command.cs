@@ -1,11 +1,6 @@
 ﻿using Magic8.Structures;
-using Microsoft.Extensions.Options;
-using System.ComponentModel.Design;
-using System.Numerics;
 using System.Text;
 using System.Text.Json;
-using static System.Net.WebRequestMethods;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Magic8.Commands
 {
@@ -39,7 +34,7 @@ namespace Magic8.Commands
                 URL = $"https://discord.com/api/v10/applications/{Application.Id}/commands/{commandId}";
             }
             return await HTTPHandler.SendRequest(HttpMethod.Get, URL);
-            
+
         }
 
         public virtual async Task<HttpResponseMessage> AddCommand(Command command, string guildId = "-1")

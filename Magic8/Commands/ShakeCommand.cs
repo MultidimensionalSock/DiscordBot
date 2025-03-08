@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Magic8.Structures;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Magic8.Structures;
-using Microsoft.Extensions.Options;
 
 namespace Magic8.Commands
 {
@@ -21,7 +16,7 @@ namespace Magic8.Commands
             new CommandOption()
             {
                 Type = CommandOptionType.STRING,
-                Name = "question", 
+                Name = "question",
                 Description = "question being asked",
                 Required = false
             }
@@ -35,7 +30,7 @@ namespace Magic8.Commands
             "Yes definitely", "You may rely on it", "As I see it, yes",
             "Most likely", "Outlook good", "Yes", "Signs point to yes",
             "Reply hazy, try again", "Ask again later", "Better not tell you now",
-            "Cannot predict now", "Concentrate and ask again", 
+            "Cannot predict now", "Concentrate and ask again",
             "Don't count on it", "My reply is no", "My sources say no",
             "Outlook not so good", "Very doubtful"
         };
@@ -45,8 +40,8 @@ namespace Magic8.Commands
             Console.WriteLine("Shake Command Called");
             Random random = new();
             string answer = "";
-            
-            
+
+
             if (interaction.Data.Options is not null && interaction.Data.Options[0].Value.ToString() != "")
             {
                 answer = $"**Question:** {interaction.Data.Options[0].Value.ToString()}\n\n**Answer:** {Answers[random.Next(0, Answers.Count)]}";
@@ -72,11 +67,11 @@ namespace Magic8.Commands
             string URL;
             using StringContent jsonContent = new(JsonSerializer.Serialize
                 (
-                new 
+                new
                 {
-                    name = Name, 
+                    name = Name,
                     description = Description,
-                    options = Options, 
+                    options = Options,
                     type = Type
                 }
                 ), Encoding.UTF8, "application/json");

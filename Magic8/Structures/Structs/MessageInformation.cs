@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Magic8.Structures.Structs
+﻿namespace Magic8.Structures.Structs
 {
     public struct MessageInformation
     {
@@ -19,6 +13,6 @@ namespace Magic8.Structures.Structs
     {
         public string title;
         public string description;
-        public int color; 
+        public int color;
     }
 }

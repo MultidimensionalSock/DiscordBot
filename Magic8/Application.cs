@@ -1,8 +1,8 @@
-﻿using System.Net.WebSockets;
+﻿using Magic8.Commands;
 using Magic8.Structures;
-using Magic8.Commands;
-using System.Text.Json;
+using System.Net.WebSockets;
 using System.Reflection;
+using System.Text.Json;
 
 namespace Magic8
 {
@@ -16,7 +16,7 @@ namespace Magic8
         public HTTPHandler? HttpHandler;
         public GatewayHandler? GatewayHandler;
 
-        public static List<Command> BotCommands = new(); 
+        public static List<Command> BotCommands = new();
 
         public Application()
         {
@@ -36,10 +36,9 @@ namespace Magic8
             GatewayHandler = new GatewayHandler(webSocketClient);
 
             GatewayHandler?.Connect();
-            
+
         }
 
-        // add commands isnt working correctly 
         public async Task AddCommands()
         {
             List<CommandData>? commandData = new List<CommandData>();
@@ -48,15 +47,13 @@ namespace Magic8
             try
             {
                 Console.WriteLine("making html reuqest");
-                response = await HTTPHandler.SendRequest(HttpMethod.Get, 
+                response = await HTTPHandler.SendRequest(HttpMethod.Get,
                     $"https://discord.com/api/v10/applications/{Id}/commands", null);
                 Console.WriteLine(response.StatusCode);
                 if (response.IsSuccessStatusCode)
                 {
                     Console.WriteLine(response.Content);
-                    //parsing is not working correctly 
                     using JsonDocument doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-                    //using JsonDocument doc = JsonDocument.Parse(response.Content.ToString());
                     commandData = JsonSerializer.Deserialize<List<CommandData>>(doc);
                 }
             }
@@ -65,7 +62,7 @@ namespace Magic8
                 Console.WriteLine(e.Message);
             }
 
-            foreach (Command command in BotCommands) 
+            foreach (Command command in BotCommands)
             {
                 if (commandData?.Count <= 0)
                 {
@@ -88,8 +85,11 @@ namespace Magic8
                         //await command.UpdateCommand(data.id);
                     }
                 }
-                using JsonDocument doc = JsonDocument.Parse(await response!.Content.ReadAsStringAsync());
-                command.Id = doc.RootElement.GetProperty("id").GetString();
+                if (response.IsSuccessStatusCode)
+                {
+                    using JsonDocument doc = JsonDocument.Parse(await response!.Content.ReadAsStringAsync());
+                    command.Id = doc.RootElement.GetProperty("id").GetString();
+                }
             }
         }
 

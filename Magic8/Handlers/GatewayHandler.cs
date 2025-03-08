@@ -2,13 +2,11 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace Magic8
 {
     class GatewayHandler
     {
-        private Application _bot;
         private Uri _gatewayUrl;
         private Uri? _resumeGatewayUrl;
         public static ClientWebSocket WebSocketClient { get; private set; }
@@ -17,12 +15,12 @@ namespace Magic8
         private bool _heartbeatResponse = true;
         private int _lastSequenceNumber = 0;
         private bool _closedMessageRecieved = false;
-        private bool _resumeSuccessful = false; 
+        private bool _resumeSuccessful = false;
+        private int _requestsIn60Seconds = 0;
 
         public GatewayHandler(ClientWebSocket webSocketClient)
         {
             WebSocketClient = webSocketClient;
-            _bot = Application.BotRef!;
         }
 
         public async Task Connect()
@@ -103,7 +101,6 @@ namespace Magic8
             switch (opcode)
             {
                 case GatewayOpcodes.DISPATCH:
-                    //Console.WriteLine(message);
                     OP0DispatchEvents eventType;
                     _lastSequenceNumber = payload.RootElement.GetProperty("s").GetInt32();
 
@@ -137,8 +134,8 @@ namespace Magic8
 
                 case GatewayOpcodes.HEARTBEAT_ACK:
                     _heartbeatResponse = true;
-                    //if an ACK is not recieved back then terminate with any cose code 
-                    //then reconnect and attempt to resurme 
+                    //if an ACK is not recieved back then terminate with any close code 
+                    //then reconnect and attempt to resume 
                     break;
             }
         }
@@ -152,13 +149,12 @@ namespace Magic8
                     BotDetails botDetails = JsonSerializer.Deserialize<BotDetails>(d);
                     Application.BotRef!.BotDetails = botDetails;
                     Application.BotRef.InitializeCommands();
-                    _resumeGatewayUrl = new Uri( d.GetProperty("resume_gateway_url").GetString());
+                    _resumeGatewayUrl = new Uri(d.GetProperty("resume_gateway_url").GetString());
                     break;
                 case OP0DispatchEvents.RESUMED:
                     _resumeSuccessful = true;
                     break;
                 case OP0DispatchEvents.INTERACTION_CREATE:
-                    //interaction object is null
                     InteractionObject interactionObject = JsonSerializer.Deserialize<InteractionObject>(d);
                     if (interactionObject.Data.Options is not null)
                     {
@@ -176,6 +172,7 @@ namespace Magic8
 
         public async Task SendMessage(GatewayOpcodes opcode)
         {
+            if (_requestsIn60Seconds >= 120) { Console.WriteLine("Max Gateway Requests in 60 seconds reached"); return; }
             string payload = "";
 
             switch (opcode)
@@ -246,6 +243,16 @@ namespace Magic8
             await WebSocketClient.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
 
             Console.WriteLine("message has been sent with opcode: " + opcode);
+            RequestCounter();
+        }
+
+        private async Task RequestCounter()
+        {
+            _requestsIn60Seconds++;
+            Console.WriteLine("_requestin60secnds");
+            await Task.Delay(60000);
+            
+            _requestsIn60Seconds--;
         }
 
         private async Task HandleClose(WebSocketReceiveResult result)

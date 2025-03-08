@@ -8,7 +8,6 @@ namespace Magic8.Structures
         //[JsonPropertyName("user")] public UserObject User { get; set; }
         [JsonPropertyName("guilds")] public Guild[]? Guilds { get; set; }
         [JsonPropertyName("session_id")] public string SessionId { get; set; }
-        //[JsonPropertyName("resume_gateway_url")] public string ResumeGatewayURL { get; set; }
         [JsonPropertyName("shard")] public int[]? Shard { get; set; }
     }
 
