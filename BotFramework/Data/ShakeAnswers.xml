@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Shake>
+	<Answers language="en" count ="19">
+		<Answer>It is certain</Answer>
+		<Answer>It is decidedly so</Answer>
+		<Answer>Without a doubt</Answer>
+		<Answer>Yes definitely</Answer>
+		<Answer>You may rely on it</Answer>
+		<Answer>As I see it, yes</Answer>
+		<Answer>Most likely</Answer>
+		<Answer>Outlook good</Answer>
+		<Answer>Yes</Answer>
+		<Answer>Signs point to yes</Answer>
+		<Answer>Reply hazy, try again</Answer>
+		<Answer>Ask again later</Answer>
+		<Answer>Better not tell you now</Answer>
+		<Answer>Cannot predict now</Answer>
+		<Answer>Concentrate and ask again</Answer>
+		<Answer>Don't count on it</Answer>
+		<Answer>My reply is no</Answer>
+		<Answer>My sources say no</Answer>
+		<Answer>Outlook not so good</Answer>
+		<Answer>Very doubtful</Answer>
+	</Answers>
+</Shake>
