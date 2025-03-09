@@ -1,9 +1,9 @@
-﻿using Magic8.Structures;
+﻿using BotFramework.Structures;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 
-namespace Magic8
+namespace BotFramework
 {
     class GatewayHandler
     {
@@ -53,6 +53,7 @@ namespace Magic8
         public async Task Reconnect()
         {
             Console.WriteLine("Reconnecting to web socket");
+            //if (WebSocketClient)
             await WebSocketClient.ConnectAsync(_resumeGatewayUrl, CancellationToken.None);
             _ = Task.Run(RecieveMessages);
             _resumeSuccessful = true;
@@ -63,7 +64,7 @@ namespace Magic8
 
         public async Task RecieveMessages()
         {
-            ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[16384]);
+            ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[100000]);
 
             while (WebSocketClient.State == WebSocketState.Open)
             {
@@ -249,9 +250,7 @@ namespace Magic8
         private async Task RequestCounter()
         {
             _requestsIn60Seconds++;
-            Console.WriteLine("_requestin60secnds");
             await Task.Delay(60000);
-            
             _requestsIn60Seconds--;
         }
 

@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Collections;
 
-namespace Magic8
+namespace BotFramework
 {
     public class HTTPHandler
     {

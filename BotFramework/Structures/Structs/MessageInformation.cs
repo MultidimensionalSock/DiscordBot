@@ -1,4 +1,4 @@
-﻿namespace Magic8.Structures.Structs
+﻿namespace BotFramework.Structures.Structs
 {
     public struct MessageInformation
     {

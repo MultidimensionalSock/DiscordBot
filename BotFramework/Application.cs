@@ -1,10 +1,10 @@
-﻿using Magic8.Commands;
-using Magic8.Structures;
+﻿using BotFramework.Commands;
+using BotFramework.Structures;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.Text.Json;
 
-namespace Magic8
+namespace BotFramework
 {
     class Application
     {
@@ -21,7 +21,7 @@ namespace Magic8
         public Application()
         {
             if (BotRef != null) return;
-            string jsonString = File.ReadAllText("ApplicationInfo.json");
+            string jsonString = File.ReadAllText("Data/ApplicationInfo.json");
             JsonDocument info = JsonDocument.Parse(jsonString);
             Int64.TryParse(info.RootElement.GetProperty("ClientId").ToString(), out Id);
             Token = info.RootElement.GetProperty("Token").GetString();

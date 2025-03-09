@@ -1,8 +1,8 @@
-﻿using Magic8.Structures;
+﻿using BotFramework.Structures;
 using System.Text;
 using System.Text.Json;
 
-namespace Magic8.Commands
+namespace BotFramework.Commands
 {
     public class ShakeCommand : Command
     {

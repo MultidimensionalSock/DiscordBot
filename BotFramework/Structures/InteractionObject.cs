@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Magic8.Structures
+namespace BotFramework.Structures
 {
     /// <summary>
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-structure

@@ -1,4 +1,4 @@
-namespace Magic8
+namespace BotFramework
 {
     public class Worker : BackgroundService
     {
