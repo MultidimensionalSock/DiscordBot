@@ -85,10 +85,13 @@ namespace BotFramework
                         //await command.UpdateCommand(data.id);
                     }
                 }
+                if (command is AddShakeResponse)
+                    Console.WriteLine("check");
                 if (response.IsSuccessStatusCode)
                 {
                     using JsonDocument doc = JsonDocument.Parse(await response!.Content.ReadAsStringAsync());
                     command.Id = doc.RootElement.GetProperty("id").GetString();
+                    Console.WriteLine("check");
                 }
             }
         }

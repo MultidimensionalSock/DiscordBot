@@ -34,7 +34,7 @@ namespace BotFramework.Commands
             }
         };
         public new string DefaultMemberPermissions = "0";
-        public new bool DmPermissions = false;
+        public new bool DmPermissions = true;
         public new bool Nsfw = false;
 
         public override async Task CallCommand(InteractionObject interaction)
@@ -53,10 +53,13 @@ namespace BotFramework.Commands
                 .First();
 
             if (element == null) return; //send message that it failed
+
+            // the right element is found but this isnt adding it to the file
             element.Add(new XElement("Answer", interaction.Data.Options[0].Value.ToString()));
 
             element.Attribute("count").Value = (int.Parse(element.Attribute("count").Value) + 1).ToString();
             Console.WriteLine("Answer Added");
+            doc.Save("Data/ShakeAnswers.xml");
 
             using StringContent jsonContent = new(JsonSerializer.Serialize(new
             {

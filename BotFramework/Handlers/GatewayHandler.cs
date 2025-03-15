@@ -1,4 +1,5 @@
-﻿using BotFramework.Structures;
+﻿using BotFramework.Commands;
+using BotFramework.Structures;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -165,8 +166,8 @@ namespace BotFramework
                             interactionObject.Data.Options[0].Value = optionsArray[i].GetProperty("value");
                         }
                     }
-                    Application.BotCommands?.Find(c => c.Id == interactionObject.Data.Id)?.CallCommand(interactionObject);
-
+                    Command command = Application.BotCommands?.Find(c => c.Id == interactionObject.Data.Id);
+                    command?.CallCommand(interactionObject);
                     break;
             }
         }

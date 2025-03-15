@@ -32,13 +32,13 @@ namespace BotFramework.Commands
         {
             XDocument doc = XDocument.Load("Data/ShakeAnswers.xml");
             Random random = new();
-            int index = random.Next(0, doc.Descendants("Answers")
-                .Where(a => (string)a.Attribute("language") == language)
-                .Select(b => (int?)b.Attribute("count"))
-                .FirstOrDefault() ?? 0);
 
-            return doc.Descendants("Answers").Where(a => (string)a.Attribute("language") == language)
-                .Elements("Answer").ElementAt(index)?.Value.ToString();
+            XElement element = doc.Descendants("Answers")
+                .Where(a => (string)a.Attribute("language") == language)
+                .First();
+            int index = random.Next(0, (int)element.Attribute("count"));
+
+            return element.Elements("Answer").ElementAt(index)?.Value.ToString();
         }
 
         public override async Task CallCommand(InteractionObject interaction)
