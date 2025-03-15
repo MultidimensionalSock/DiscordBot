@@ -182,7 +182,7 @@ namespace BotFramework
                 case GatewayOpcodes.HEARTBEAT:
                     if (_heartbeatResponse == false)
                     {
-                        await CloseConnection(1001);
+                        await CloseConnection((WebSocketCloseStatus)1001);
                         await Reconnect();
                     }
                     var heartbeat = new { op = 1, d = (int?)null };
@@ -302,19 +302,10 @@ namespace BotFramework
             else await Connect();
         }
 
-        public async Task CloseConnection(int closeCode)
+        public async Task CloseConnection(WebSocketCloseStatus closeStatus)
         {
             string reasonText = "";
 
-            switch (closeCode)
-            {
-                case 1000:
-                    reasonText = "Normal Closure";
-                    break;
-                case 1001:
-                    reasonText = "Going Away";
-                    break;
-            }
 
             var close = new
             {
@@ -325,7 +316,7 @@ namespace BotFramework
 
             string payload = JsonSerializer.Serialize(close);
             byte[] bytes = Encoding.UTF8.GetBytes(payload);
-            await WebSocketClient.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+            await WebSocketClient.CloseAsync(closeStatus, "Closing connection", CancellationToken.None);
         }
     }
 }
