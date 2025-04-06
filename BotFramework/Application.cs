@@ -11,6 +11,7 @@ namespace BotFramework
         public BotDetails? BotDetails { get; set; }
         public static Int64 Id;
         public static string? Token;
+        public static Logger Logger;
 
         public static Application? BotRef;
         public HTTPHandler? HttpHandler;
@@ -37,6 +38,7 @@ namespace BotFramework
 
             GatewayHandler?.Connect();
 
+            Logger = new Logger();
         }
 
         public async Task AddCommands()
@@ -46,20 +48,17 @@ namespace BotFramework
 
             try
             {
-                Console.WriteLine("making html reuqest");
                 response = await HTTPHandler.SendRequest(HttpMethod.Get,
                     $"https://discord.com/api/v10/applications/{Id}/commands", null);
-                Console.WriteLine(response.StatusCode);
                 if (response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine(response.Content);
                     using JsonDocument doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
                     commandData = JsonSerializer.Deserialize<List<CommandData>>(doc);
                 }
             }
             catch (HttpRequestException e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(LogType.Error, "Application.AddCommands", e.Message);
             }
 
             foreach (Command command in BotCommands)

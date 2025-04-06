@@ -35,8 +35,9 @@ namespace BotFramework
             }
             HttpResponseMessage response = await HttpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Response Code: {response.StatusCode}");
-            Console.WriteLine($"Response Body: {responseContent}");
+            if (response.IsSuccessStatusCode) { Logger.Log(LogType.Response, httpMethod.ToString(), $"status code: {response.StatusCode} Content: {response.Content}"); }
+            else { Logger.Log(LogType.Error, httpMethod.ToString(), $"status code: {response.StatusCode} Content: {response.Content}"); }
+            
             HTTPHandler.HttpHandler.RequestCounter();
             return response;
         }

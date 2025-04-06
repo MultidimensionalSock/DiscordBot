@@ -58,7 +58,7 @@ namespace BotFramework.Commands
             element.Add(new XElement("Answer", interaction.Data.Options[0].Value.ToString()));
 
             element.Attribute("count").Value = (int.Parse(element.Attribute("count").Value) + 1).ToString();
-            Console.WriteLine("Answer Added");
+            Logger.Log(LogType.BotAction, "Shake Answer Added", "");
             doc.Save("Data/ShakeAnswers.xml");
 
             using StringContent jsonContent = new(JsonSerializer.Serialize(new

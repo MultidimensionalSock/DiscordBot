@@ -43,7 +43,7 @@ namespace BotFramework.Commands
 
         public override async Task CallCommand(InteractionObject interaction)
         {
-            Console.WriteLine("Shake Command Called");
+            Logger.Log(LogType.Response, "", "Shake Command Called");
             Random random = new();
             string answer = "";
 
