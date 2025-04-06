@@ -18,7 +18,7 @@ namespace BotFramework.Commands
 
         public virtual async Task CallCommand(InteractionObject interaction)
         {
-            Logger.Log(LogType.Request, $"Command {Name} Called", "");
+            Logger.Log(LogType.Request, $"Command {Name} Called");
         }
 
         //TO DO:
@@ -45,7 +45,7 @@ namespace BotFramework.Commands
                 name = command.Name.ToString(),
                 description = command.Description.ToString()
             }), Encoding.UTF8, "application/json");
-            Logger.Log(LogType.Request, "Add Command", jsonContent.ToString());
+            Logger.Log(LogType.Request, jsonContent.ToString());
 
             //change based on whether its a guild command or not
             if (guildId == "-1")

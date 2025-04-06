@@ -58,7 +58,7 @@ namespace BotFramework
             }
             catch (HttpRequestException e)
             {
-                Logger.Log(LogType.Error, "Application.AddCommands", e.Message);
+                Logger.Log(LogType.Error, e.Message);
             }
 
             foreach (Command command in BotCommands)
