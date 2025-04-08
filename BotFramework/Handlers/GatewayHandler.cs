@@ -40,22 +40,22 @@ namespace BotFramework
                 }
                 catch (HttpRequestException e)
                 {
-                    Logger.Log(LogType.Error, e.Message);
+                    Log.Error(e.Message);
                 }
 
-                Logger.Log(LogType.Response, await response.Content.ReadAsStringAsync());
+                Log.Trace(await response.Content.ReadAsStringAsync());
             }
 
-            Logger.Log(LogType.Request, "Attempting to connect to WebSocket");
+            Log.Debug("Attempting to connect to WebSocket");
             try
             {
                 await WebSocketClient.ConnectAsync(_gatewayUrl, CancellationToken.None);
-                Logger.Log(LogType.Response, "WebSocket Connection established");
+                Log.Debug("WebSocket Connection established");
                 _ = Task.Run(RecieveMessages);
             }
             catch (HttpRequestException e)
             {
-                Logger.Log(LogType.Error, e.Message);
+                Log.Error(e.Message);
             }
         }
 
@@ -63,19 +63,19 @@ namespace BotFramework
         //https://discord.com/developers/docs/events/gateway#preparing-to-resume
         public async Task Reconnect()
         {
-            Logger.Log(LogType.Request, "Reconnecting To WebSocket");
+            Log.Debug("Reconnecting To WebSocket");
             //if (WebSocketClient)
             try
             {
                 await WebSocketClient.ConnectAsync(_resumeGatewayUrl, CancellationToken.None);
                 _ = Task.Run(RecieveMessages);
                 _resumeSuccessful = true;
-                Logger.Log(LogType.Request, "Reconnected to WebSocket");
+                Log.Debug("Reconnected to WebSocket");
                 await SendMessage(GatewayOpcodes.RESUME);
             }
             catch (WebSocketException e)
             {
-                Logger.Log(LogType.Error, e.Message);
+                Log.Error(e.Message);
             }
             
 
@@ -113,11 +113,11 @@ namespace BotFramework
             }
             catch (JsonException e)
             {
-                Logger.Log(LogType.Error, e.Message);
+                Log.Error(e.Message);
             }
 
             GatewayOpcodes opcode = (GatewayOpcodes)payload!.RootElement.GetProperty("op").GetInt32();
-            Logger.Log(LogType.GatewayEvent, "message has been recieved with opcode: " + opcode);
+            Log.Trace("message has been recieved with opcode: " + opcode);
 
             switch (opcode)
             {
@@ -163,7 +163,7 @@ namespace BotFramework
 
         private async Task HandleOP0Message(OP0DispatchEvents eventType, JsonElement d)
         {
-            Logger.Log(LogType.GatewayEvent, "OP0 event recieved with type: " + eventType);
+            Log.Trace("OP0 event recieved with type: " + eventType);
             switch (eventType)
             {
                 case OP0DispatchEvents.READY:
@@ -193,7 +193,7 @@ namespace BotFramework
 
         public async Task SendMessage(GatewayOpcodes opcode)
         {
-            if (_requestsIn60Seconds >= 120) { Logger.Log(LogType.RateLimiting, "Max Gateway Requests in 60 seconds reached"); return; }
+            if (_requestsIn60Seconds >= 120) { Log.Warn("Max Gateway Requests in 60 seconds reached"); return; }
             string payload = "";
 
             switch (opcode)
@@ -255,7 +255,7 @@ namespace BotFramework
                 case GatewayOpcodes.REQUEST_SOUNDBOARD_SOUNDS:
                     break;
                 default:
-                    Logger.Log(LogType.Error, "No message has been sent for: " + opcode);
+                    Log.Error("No message has been sent for: " + opcode);
                     return;
             }
             if (payload == "") return;
@@ -263,7 +263,7 @@ namespace BotFramework
             byte[] bytes = Encoding.UTF8.GetBytes(payload);
             await WebSocketClient.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
 
-            Logger.Log(LogType.Response, "message has been sent with opcode: " + opcode);
+            Log.Trace("message has been sent with opcode: " + opcode);
             RequestCounter();
         }
 

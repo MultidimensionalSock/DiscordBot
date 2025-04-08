@@ -11,7 +11,7 @@ namespace BotFramework
         public BotDetails? BotDetails { get; set; }
         public static Int64 Id;
         public static string? Token;
-        public static Logger Logger;
+        public static Log Logger;
 
         public static Application? BotRef;
         public HTTPHandler? HttpHandler;
@@ -38,7 +38,7 @@ namespace BotFramework
 
             GatewayHandler?.Connect();
 
-            Logger = new Logger();
+            Logger = new Log();
         }
 
         public async Task AddCommands()
@@ -58,7 +58,7 @@ namespace BotFramework
             }
             catch (HttpRequestException e)
             {
-                Logger.Log(LogType.Error, e.Message);
+                Log.Error(e.Message);
             }
 
             foreach (Command command in BotCommands)
