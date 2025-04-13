@@ -1,7 +1,6 @@
 ﻿using BotFramework.Commands;
 using BotFramework.Structures;
 using System.Net.WebSockets;
-using System.Reflection.Emit;
 using System.Text;
 using System.Text.Json;
 
@@ -77,9 +76,9 @@ namespace BotFramework
             {
                 Log.Error(e.Message);
             }
-            
 
-            
+
+
         }
 
         public async Task RecieveMessages()

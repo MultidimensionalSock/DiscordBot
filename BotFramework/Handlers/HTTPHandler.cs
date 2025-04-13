@@ -1,5 +1,5 @@
 ﻿using System.Net.Http.Headers;
-using System.Collections;
+
 
 namespace BotFramework
 {
@@ -12,7 +12,7 @@ namespace BotFramework
         public HTTPHandler(HttpClient httpClient)
         {
             HttpClient = httpClient;
-            HttpHandler = this; 
+            HttpHandler = this;
         }
 
         public static async Task<HttpResponseMessage> SendRequest(HttpMethod httpMethod, string Url, StringContent? body = null, Header[]? headers = null)
@@ -37,7 +37,7 @@ namespace BotFramework
             string responseContent = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode) { Log.Trace($"status code: {response.StatusCode} Content: {response.Content}"); }
             else { Log.Error($"{Url}, status code: {response.StatusCode} Content: {response.Content}"); }
-            
+
             HTTPHandler.HttpHandler.RequestCounter();
             return response;
         }

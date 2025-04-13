@@ -1,8 +1,6 @@
 ﻿using BotFramework.Structures;
-using System.Diagnostics.SymbolStore;
 using System.Text;
 using System.Text.Json;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace BotFramework.Commands

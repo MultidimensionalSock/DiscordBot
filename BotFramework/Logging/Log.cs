@@ -1,25 +1,26 @@
 ﻿using System.Data.SQLite;
-using System;
 using System.Runtime.CompilerServices;
-using System.Data.Entity.Core.Metadata.Edm;
 
 class Log
 {
     private static SQLiteConnection _connection;
     string DatabaseName = "DiscordBotDatabase";
+    EmailSender emailSender;
 
     public Log()
     {
         _connection = ConnectToDatabase(DatabaseName);
-        CreateLogTable(); 
+        CreateLogTable();
+        emailSender = new EmailSender();
+        emailSender.SendEmail("test", "testifthisisworking", "dbotham16@outlook.com");
     }
 
     private SQLiteConnection ConnectToDatabase(string databaseName)
     {
         SQLiteConnection connection = new SQLiteConnection($"Data Source={databaseName}");
 
-        try 
-        { 
+        try
+        {
             connection.Open();
             Console.WriteLine("Database connection Successful");
             return connection;
@@ -115,10 +116,10 @@ class Log
 public enum LogType
 {
     Fatal = 0,
-    Error = 1, 
-    Warn = 2, 
-    Info = 3, 
-    Debug = 4, 
+    Error = 1,
+    Warn = 2,
+    Info = 3,
+    Debug = 4,
     Trace = 5
 }
 
