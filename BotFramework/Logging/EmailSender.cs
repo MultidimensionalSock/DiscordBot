@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿
 using System.Net.Mail;
 using System.Text.Json;
 
@@ -7,14 +7,12 @@ public class EmailSender
     SmtpClient smtpClient;
     string _sender;
     string _password;
-    string _recipient;
     public EmailSender()
     {
         string jsonString = File.ReadAllText("Logging/LoggingConfig.json");
         JsonDocument info = JsonDocument.Parse(jsonString);
         _sender = info.RootElement.GetProperty("sender").GetString();
         _password = info.RootElement.GetProperty("password").GetString();
-        _recipient = info.RootElement.GetProperty("recipient").GetString();
 
         System.Net.NetworkCredential credentials = new System.Net.NetworkCredential(
             _sender, _password);
@@ -36,13 +34,13 @@ public class EmailSender
         MailMessage email = new MailMessage(_sender, recipient, subject, message);
         try
         {
-            Console.WriteLine("try send email");
+            Log.Debug("try send email");
             smtpClient.Send(email);
-            Console.WriteLine("Email sent!");
+            Log.Debug("Email sent!");
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Log.Error(ex.ToString());
         }
         
     }
@@ -59,7 +57,24 @@ public class EmailSender
     {
         MailMessage email = new MailMessage(_sender, recipient, subject, message);
         email.Attachments.Add(attachment);
-        smtpClient.Send(email);
+        try
+        {
+            Log.Debug("try send email");
+            smtpClient.Send(email);
+            Log.Debug("Email sent!");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex.ToString());
+        }
+    }
+
+    public void SendEmailAttachment(string subject, string message, Attachment attachment, string[] recipients)
+    {
+        foreach (string recipient in recipients)
+        {
+            SendEmailAttachment(subject, message, attachment, recipient);
+        }
     }
 }
 

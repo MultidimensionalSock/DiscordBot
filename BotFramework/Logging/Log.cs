@@ -111,6 +111,32 @@ class Log
             }
         }
     }
+
+    public static SQLiteDataReader ReadSQL(string query, (string paramName, object value)[]? parameters)
+    {
+        SQLiteDataReader reader = null;
+        using (SQLiteCommand command = new SQLiteCommand(query, _connection))
+        {
+            if (parameters != null)
+            {
+                foreach (var param in parameters)
+                {
+                    command.Parameters.AddWithValue(param.paramName, param.value);
+                }
+            }
+            try
+            {
+                reader = command.ExecuteReader();
+            }
+            catch (Exception e)
+            {
+                Log.Debug(e.Message);
+            }
+        }
+        return reader;
+    }
+
+
 }
 
 public enum LogType
