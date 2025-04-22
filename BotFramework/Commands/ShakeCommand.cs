@@ -28,7 +28,17 @@ namespace BotFramework.Commands
 
         public string GetAnswer(string language = "en")
         {
-            XDocument doc = XDocument.Load("Data/ShakeAnswers.xml");
+            XDocument doc;
+            try
+            {
+                doc = XDocument.Load("Data/ShakeAnswers.xml");
+            }
+            catch (Exception e)
+            {
+                Log.Warn(e.Message);
+                return "Shake answers cannot be loaded"; 
+            }
+
             Random random = new();
 
             XElement element = doc.Descendants("Answers")
@@ -94,6 +104,6 @@ namespace BotFramework.Commands
 
     public struct AnswerData
     {
-        public string[] answers { get; set; }
+        public string[] Answers { get; set; }
     }
 }

@@ -4,15 +4,15 @@ using System.Runtime.CompilerServices;
 class Log
 {
     private static SQLiteConnection _connection;
-    string DatabaseName = "DiscordBotDatabase";
-    EmailSender emailSender;
+    private const string _databaseName = "DiscordBotDatabase";
+    private EmailSender _emailSender;
 
     public Log()
     {
-        _connection = ConnectToDatabase(DatabaseName);
+        _connection = ConnectToDatabase(_databaseName);
         CreateLogTable();
-        emailSender = new EmailSender();
-        emailSender.SendEmail("test", "testifthisisworking", "dbotham16@outlook.com");
+        _emailSender = new EmailSender();
+        _emailSender.SendEmail("test", "testifthisisworking", "dbotham16@outlook.com");
     }
 
     private SQLiteConnection ConnectToDatabase(string databaseName)
@@ -112,7 +112,7 @@ class Log
         }
     }
 
-    public static SQLiteDataReader ReadSQL(string query, (string paramName, object value)[]? parameters)
+    public static SQLiteDataReader ReadSQL(string query, params (string paramName, object value)[] parameters)
     {
         SQLiteDataReader reader = null;
         using (SQLiteCommand command = new SQLiteCommand(query, _connection))
