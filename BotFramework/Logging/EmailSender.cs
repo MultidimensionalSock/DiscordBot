@@ -4,9 +4,10 @@ using System.Text.Json;
 
 public class EmailSender
 {
-    SmtpClient smtpClient;
-    string _sender;
-    string _password;
+    private SmtpClient smtpClient;
+    private string _sender;
+    private string _password;
+
     public EmailSender()
     {
         string jsonString = File.ReadAllText("Logging/LoggingConfig.json");

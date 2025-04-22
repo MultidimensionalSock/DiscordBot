@@ -83,7 +83,7 @@ namespace BotFramework
 
         public async Task RecieveMessages()
         {
-            ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[100000]);
+            ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[26214400]);
 
             while (WebSocketClient.State == WebSocketState.Open)
             {

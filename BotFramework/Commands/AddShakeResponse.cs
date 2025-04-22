@@ -42,7 +42,16 @@ namespace BotFramework.Commands
                 language = interaction.Data.Options[1].Value.ToString();
             }
 
-            XDocument doc = XDocument.Load("Data/ShakeAnswers.xml");
+            XDocument doc;
+            try
+            {
+                doc = XDocument.Load("Data/ShakeAnswers.xml");
+            }
+            catch (Exception e)
+            {
+                Log.Warn("Shake answers cannot be loaded! " + e);
+                return;
+            }
 
             XElement element = doc.Descendants("Answers")
                 .Where(a => (string)a.Attribute("language") == language)
