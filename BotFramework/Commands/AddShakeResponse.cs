@@ -1,61 +1,68 @@
-﻿using Magic8.Structures;
+﻿using BotFramework.Structures;
 using System.Text;
 using System.Text.Json;
+using System.Xml.Linq;
 
-namespace Magic8.Commands
+namespace BotFramework.Commands
 {
-    public class ShakeCommand : Command
+    class AddShakeResponse : Command
     {
         public new string? Id;
         public new bool GuildCommand { get; private set; }
-        public new string Name = "shake";
+        public new string Name = "addresponse";
         public new CommandType Type = CommandType.CHAT_INPUT;
-        public new string Description = "Shake the magic ball";
+        public new string Description = "add shake response";
         public new List<CommandOption> Options = new()
         {
             new CommandOption()
             {
                 Type = CommandOptionType.STRING,
-                Name = "question",
-                Description = "question being asked",
+                Name = "response",
+                Description = "new response to add",
+                Required = true
+            },
+            new CommandOption()
+            {
+                Type = CommandOptionType.STRING,
+                Name = "language",
+                Description = "language of answer",
                 Required = false
             }
         };
         public new string DefaultMemberPermissions = "0";
         public new bool DmPermissions = true;
         public new bool Nsfw = false;
-        private List<string> Answers = new()
-        {
-            "It is certain", "It is decidedly so", "Without a doubt",
-            "Yes definitely", "You may rely on it", "As I see it, yes",
-            "Most likely", "Outlook good", "Yes", "Signs point to yes",
-            "Reply hazy, try again", "Ask again later", "Better not tell you now",
-            "Cannot predict now", "Concentrate and ask again",
-            "Don't count on it", "My reply is no", "My sources say no",
-            "Outlook not so good", "Very doubtful"
-        };
 
         public override async Task CallCommand(InteractionObject interaction)
         {
-            Console.WriteLine("Shake Command Called");
-            Random random = new();
-            string answer = "";
-
-
-            if (interaction.Data.Options is not null && interaction.Data.Options[0].Value.ToString() != "")
+            string language = "en";
+            if (interaction.Data.Options.Length > 1 && interaction.Data.Options[1].Value.ToString() != "")
             {
-                answer = $"**Question:** {interaction.Data.Options[0].Value.ToString()}\n\n**Answer:** {Answers[random.Next(0, Answers.Count)]}";
+                //this needs to be checked that if it isnt a valid option its not accepted. 
+                language = interaction.Data.Options[1].Value.ToString();
             }
-            else
-            {
-                answer = Answers[random.Next(0, Answers.Count)];
-            }
+
+            XDocument doc = XDocument.Load("Data/ShakeAnswers.xml");
+
+            XElement element = doc.Descendants("Answers")
+                .Where(a => (string)a.Attribute("language") == language)
+                .First();
+
+            if (element == null) return; //send message that it failed
+
+            // the right element is found but this isnt adding it to the file
+            element.Add(new XElement("Answer", interaction.Data.Options[0].Value.ToString()));
+
+            element.Attribute("count").Value = (int.Parse(element.Attribute("count").Value) + 1).ToString();
+            Log.Debug("Shake Answer Added");
+            doc.Save("Data/ShakeAnswers.xml");
+
             using StringContent jsonContent = new(JsonSerializer.Serialize(new
             {
                 type = (int)InteractionCallbackType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data = new
                 {
-                    content = answer
+                    content = "added to responses"
                 }
             }), Encoding.UTF8, "application/json");
 

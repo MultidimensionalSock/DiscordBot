@@ -1,9 +1,10 @@
-﻿using Magic8.Structures;
+﻿using BotFramework.Commands;
+using BotFramework.Structures;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 
-namespace Magic8
+namespace BotFramework
 {
     class GatewayHandler
     {
@@ -25,45 +26,64 @@ namespace Magic8
 
         public async Task Connect()
         {
-            //Get Gateway URL 
+            using (HttpResponseMessage response = await HTTPHandler.SendUnauthRequest(HttpMethod.Get, "https://discord.com/api/v10/gateway"))
+            {
+                try
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string json = await response.Content.ReadAsStringAsync();
+                        using JsonDocument doc = JsonDocument.Parse(json);
+                        _gatewayUrl = new Uri(doc.RootElement.GetProperty("url").GetString());// + "?v=10&encoding=json");
+                    }
+                }
+                catch (HttpRequestException e)
+                {
+                    Log.Error(e.Message);
+                }
+
+                Log.Trace(await response.Content.ReadAsStringAsync());
+            }
+
+            Log.Debug("Attempting to connect to WebSocket");
             try
             {
-                HttpResponseMessage response = await HTTPHandler.SendUnauthRequest(HttpMethod.Get, "https://discord.com/api/v10/gateway");
-                if (response.IsSuccessStatusCode)
-                {
-                    string json = await response.Content.ReadAsStringAsync();
-                    using JsonDocument doc = JsonDocument.Parse(json);
-                    _gatewayUrl = new Uri(doc.RootElement.GetProperty("url").GetString());// + "?v=10&encoding=json");
-                }
+                await WebSocketClient.ConnectAsync(_gatewayUrl, CancellationToken.None);
+                Log.Debug("WebSocket Connection established");
+                _ = Task.Run(RecieveMessages);
             }
             catch (HttpRequestException e)
             {
-                Console.WriteLine(e.Message);
+                Log.Error(e.Message);
             }
-
-            Console.WriteLine("Connecting to web socket");
-            await WebSocketClient.ConnectAsync(_gatewayUrl, CancellationToken.None);
-            Console.WriteLine("Connected");
-
-            _ = Task.Run(RecieveMessages);
         }
 
         //how to resume: 
         //https://discord.com/developers/docs/events/gateway#preparing-to-resume
         public async Task Reconnect()
         {
-            Console.WriteLine("Reconnecting to web socket");
-            await WebSocketClient.ConnectAsync(_resumeGatewayUrl, CancellationToken.None);
-            _ = Task.Run(RecieveMessages);
-            _resumeSuccessful = true;
-            Console.WriteLine("Reconnected");
+            Log.Debug("Reconnecting To WebSocket");
+            //if (WebSocketClient)
+            try
+            {
+                await WebSocketClient.ConnectAsync(_resumeGatewayUrl, CancellationToken.None);
+                _ = Task.Run(RecieveMessages);
+                _resumeSuccessful = true;
+                Log.Debug("Reconnected to WebSocket");
+                await SendMessage(GatewayOpcodes.RESUME);
+            }
+            catch (WebSocketException e)
+            {
+                Log.Error(e.Message);
+            }
 
-            await SendMessage(GatewayOpcodes.RESUME);
+
+
         }
 
         public async Task RecieveMessages()
         {
-            ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[16384]);
+            ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[100000]);
 
             while (WebSocketClient.State == WebSocketState.Open)
             {
@@ -90,13 +110,13 @@ namespace Magic8
             {
                 payload = JsonDocument.Parse(message);
             }
-            catch (JsonException ex)
+            catch (JsonException e)
             {
-                Console.WriteLine($"JsonException:" + ex.Message);
+                Log.Error(e.Message);
             }
 
             GatewayOpcodes opcode = (GatewayOpcodes)payload!.RootElement.GetProperty("op").GetInt32();
-            Console.WriteLine("message has been recieved with opcode: " + opcode);
+            Log.Trace("message has been recieved with opcode: " + opcode);
 
             switch (opcode)
             {
@@ -142,7 +162,7 @@ namespace Magic8
 
         private async Task HandleOP0Message(OP0DispatchEvents eventType, JsonElement d)
         {
-            Console.WriteLine("OP0 event recieved with type: " + eventType);
+            Log.Trace("OP0 event recieved with type: " + eventType);
             switch (eventType)
             {
                 case OP0DispatchEvents.READY:
@@ -164,15 +184,15 @@ namespace Magic8
                             interactionObject.Data.Options[0].Value = optionsArray[i].GetProperty("value");
                         }
                     }
-                    Application.BotCommands?.Find(c => c.Id == interactionObject.Data.Id)?.CallCommand(interactionObject);
-
+                    Command command = Application.BotCommands?.Find(c => c.Id == interactionObject.Data.Id);
+                    command?.CallCommand(interactionObject);
                     break;
             }
         }
 
         public async Task SendMessage(GatewayOpcodes opcode)
         {
-            if (_requestsIn60Seconds >= 120) { Console.WriteLine("Max Gateway Requests in 60 seconds reached"); return; }
+            if (_requestsIn60Seconds >= 120) { Log.Warn("Max Gateway Requests in 60 seconds reached"); return; }
             string payload = "";
 
             switch (opcode)
@@ -180,7 +200,7 @@ namespace Magic8
                 case GatewayOpcodes.HEARTBEAT:
                     if (_heartbeatResponse == false)
                     {
-                        await CloseConnection(1001);
+                        await CloseConnection((WebSocketCloseStatus)1001);
                         await Reconnect();
                     }
                     var heartbeat = new { op = 1, d = (int?)null };
@@ -234,7 +254,7 @@ namespace Magic8
                 case GatewayOpcodes.REQUEST_SOUNDBOARD_SOUNDS:
                     break;
                 default:
-                    Console.WriteLine("No message has been sent for: " + opcode);
+                    Log.Error("No message has been sent for: " + opcode);
                     return;
             }
             if (payload == "") return;
@@ -242,16 +262,14 @@ namespace Magic8
             byte[] bytes = Encoding.UTF8.GetBytes(payload);
             await WebSocketClient.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
 
-            Console.WriteLine("message has been sent with opcode: " + opcode);
+            Log.Trace("message has been sent with opcode: " + opcode);
             RequestCounter();
         }
 
         private async Task RequestCounter()
         {
             _requestsIn60Seconds++;
-            Console.WriteLine("_requestin60secnds");
             await Task.Delay(60000);
-            
             _requestsIn60Seconds--;
         }
 
@@ -302,19 +320,10 @@ namespace Magic8
             else await Connect();
         }
 
-        public async Task CloseConnection(int closeCode)
+        public async Task CloseConnection(WebSocketCloseStatus closeStatus)
         {
             string reasonText = "";
 
-            switch (closeCode)
-            {
-                case 1000:
-                    reasonText = "Normal Closure";
-                    break;
-                case 1001:
-                    reasonText = "Going Away";
-                    break;
-            }
 
             var close = new
             {
@@ -325,7 +334,7 @@ namespace Magic8
 
             string payload = JsonSerializer.Serialize(close);
             byte[] bytes = Encoding.UTF8.GetBytes(payload);
-            await WebSocketClient.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+            await WebSocketClient.CloseAsync(closeStatus, "Closing connection", CancellationToken.None);
         }
     }
 }

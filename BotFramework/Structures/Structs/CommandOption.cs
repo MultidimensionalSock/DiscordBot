@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Magic8.Structures
+namespace BotFramework.Structures
 {
     public struct CommandOption
     {

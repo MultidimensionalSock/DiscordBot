@@ -1,4 +1,4 @@
-using Magic8;
+using BotFramework;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddHostedService<Worker>();

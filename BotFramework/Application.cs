@@ -1,16 +1,17 @@
-﻿using Magic8.Commands;
-using Magic8.Structures;
+﻿using BotFramework.Commands;
+using BotFramework.Structures;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.Text.Json;
 
-namespace Magic8
+namespace BotFramework
 {
     class Application
     {
         public BotDetails? BotDetails { get; set; }
         public static Int64 Id;
         public static string? Token;
+        public static Log Logger;
 
         public static Application? BotRef;
         public HTTPHandler? HttpHandler;
@@ -21,7 +22,7 @@ namespace Magic8
         public Application()
         {
             if (BotRef != null) return;
-            string jsonString = File.ReadAllText("ApplicationInfo.json");
+            string jsonString = File.ReadAllText("Data/ApplicationInfo.json");
             JsonDocument info = JsonDocument.Parse(jsonString);
             Int64.TryParse(info.RootElement.GetProperty("ClientId").ToString(), out Id);
             Token = info.RootElement.GetProperty("Token").GetString();
@@ -37,6 +38,7 @@ namespace Magic8
 
             GatewayHandler?.Connect();
 
+            Logger = new Log();
         }
 
         public async Task AddCommands()
@@ -46,20 +48,17 @@ namespace Magic8
 
             try
             {
-                Console.WriteLine("making html reuqest");
                 response = await HTTPHandler.SendRequest(HttpMethod.Get,
                     $"https://discord.com/api/v10/applications/{Id}/commands", null);
-                Console.WriteLine(response.StatusCode);
                 if (response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine(response.Content);
                     using JsonDocument doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
                     commandData = JsonSerializer.Deserialize<List<CommandData>>(doc);
                 }
             }
             catch (HttpRequestException e)
             {
-                Console.WriteLine(e.Message);
+                Log.Error(e.Message);
             }
 
             foreach (Command command in BotCommands)

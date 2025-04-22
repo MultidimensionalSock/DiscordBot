@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
-using System.Collections;
 
-namespace Magic8
+
+namespace BotFramework
 {
     public class HTTPHandler
     {
@@ -12,7 +12,7 @@ namespace Magic8
         public HTTPHandler(HttpClient httpClient)
         {
             HttpClient = httpClient;
-            HttpHandler = this; 
+            HttpHandler = this;
         }
 
         public static async Task<HttpResponseMessage> SendRequest(HttpMethod httpMethod, string Url, StringContent? body = null, Header[]? headers = null)
@@ -35,8 +35,9 @@ namespace Magic8
             }
             HttpResponseMessage response = await HttpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Response Code: {response.StatusCode}");
-            Console.WriteLine($"Response Body: {responseContent}");
+            if (response.IsSuccessStatusCode) { Log.Trace($"status code: {response.StatusCode} Content: {response.Content}"); }
+            else { Log.Error($"{Url}, status code: {response.StatusCode} Content: {response.Content}"); }
+
             HTTPHandler.HttpHandler.RequestCounter();
             return response;
         }

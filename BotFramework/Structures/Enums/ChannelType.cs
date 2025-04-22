@@ -1,4 +1,4 @@
-﻿namespace Magic8.Structures.Enums
+﻿namespace BotFramework.Structures.Enums
 {
     public enum ChannelType
     {

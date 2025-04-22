@@ -8,6 +8,35 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Data\ShakeAnswers.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Data\ShakeAnswers.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Office.Interop.Outlook" Version="15.0.4797.1004" />
+    <PackageReference Include="MySql.Data" Version="9.2.0" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Data\ApplicationInfo.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Logging\Logs.sql">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>Logs.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Settings.job">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

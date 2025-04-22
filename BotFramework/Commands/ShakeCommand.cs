@@ -1,8 +1,9 @@
-﻿using Magic8.Structures;
+﻿using BotFramework.Structures;
 using System.Text;
 using System.Text.Json;
+using System.Xml.Linq;
 
-namespace Magic8.Commands
+namespace BotFramework.Commands
 {
     public class ShakeCommand : Command
     {
@@ -24,31 +25,34 @@ namespace Magic8.Commands
         public new string DefaultMemberPermissions = "0";
         public new bool DmPermissions = true;
         public new bool Nsfw = false;
-        private List<string> Answers = new()
+
+        public string GetAnswer(string language = "en")
         {
-            "It is certain", "It is decidedly so", "Without a doubt",
-            "Yes definitely", "You may rely on it", "As I see it, yes",
-            "Most likely", "Outlook good", "Yes", "Signs point to yes",
-            "Reply hazy, try again", "Ask again later", "Better not tell you now",
-            "Cannot predict now", "Concentrate and ask again",
-            "Don't count on it", "My reply is no", "My sources say no",
-            "Outlook not so good", "Very doubtful"
-        };
+            XDocument doc = XDocument.Load("Data/ShakeAnswers.xml");
+            Random random = new();
+
+            XElement element = doc.Descendants("Answers")
+                .Where(a => (string)a.Attribute("language") == language)
+                .First();
+            int index = random.Next(0, (int)element.Attribute("count"));
+
+            return element.Elements("Answer").ElementAt(index)?.Value.ToString();
+        }
 
         public override async Task CallCommand(InteractionObject interaction)
         {
-            Console.WriteLine("Shake Command Called");
+            Log.Trace("Shake Command Called");
             Random random = new();
             string answer = "";
 
 
             if (interaction.Data.Options is not null && interaction.Data.Options[0].Value.ToString() != "")
             {
-                answer = $"**Question:** {interaction.Data.Options[0].Value.ToString()}\n\n**Answer:** {Answers[random.Next(0, Answers.Count)]}";
+                answer = $"**Question:** {interaction.Data.Options[0].Value.ToString()}\n\n**Answer:** {GetAnswer()}";
             }
             else
             {
-                answer = Answers[random.Next(0, Answers.Count)];
+                answer = GetAnswer();
             }
             using StringContent jsonContent = new(JsonSerializer.Serialize(new
             {
@@ -86,5 +90,10 @@ namespace Magic8.Commands
             }
             return await HTTPHandler.SendRequest(HttpMethod.Post, URL, jsonContent);
         }
+    }
+
+    public struct AnswerData
+    {
+        public string[] answers { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Magic8.Structures
+﻿namespace BotFramework.Structures
 {
     public enum CloseEvent
     {

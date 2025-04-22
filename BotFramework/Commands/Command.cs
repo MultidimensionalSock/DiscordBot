@@ -1,8 +1,8 @@
-﻿using Magic8.Structures;
+﻿using BotFramework.Structures;
 using System.Text;
 using System.Text.Json;
 
-namespace Magic8.Commands
+namespace BotFramework.Commands
 {
     public class Command
     {
@@ -18,7 +18,7 @@ namespace Magic8.Commands
 
         public virtual async Task CallCommand(InteractionObject interaction)
         {
-            Console.WriteLine($"Command {Name} Called");
+            Log.Debug($"Command {Name} Called");
         }
 
         //TO DO:
@@ -45,7 +45,7 @@ namespace Magic8.Commands
                 name = command.Name.ToString(),
                 description = command.Description.ToString()
             }), Encoding.UTF8, "application/json");
-            Console.WriteLine(jsonContent);
+            Log.Trace(jsonContent.ToString());
 
             //change based on whether its a guild command or not
             if (guildId == "-1")
