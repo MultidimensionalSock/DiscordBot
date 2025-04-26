@@ -1,6 +1,7 @@
 ﻿using BotFramework.Structures;
 using System.Text;
 using System.Text.Json;
+using Logging;
 
 namespace BotFramework.Commands
 {

@@ -1,5 +1,5 @@
 ﻿using System.Net.Http.Headers;
-
+using Logging;
 
 namespace BotFramework
 {
@@ -8,6 +8,7 @@ namespace BotFramework
         public static HttpClient? HttpClient { get; private set; }
         public static HTTPHandler HttpHandler;
         private static int requestsInLast60Seconds;
+        public static bool GlobalRateLimitReached => requestsInLast60Seconds > 60;
 
         public HTTPHandler(HttpClient httpClient)
         {
@@ -35,10 +36,23 @@ namespace BotFramework
             }
             HttpResponseMessage response = await HttpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
+            
             if (response.IsSuccessStatusCode)
+            {
                 Log.Trace($"status code: {response.StatusCode} Content: {response.Content}");
-            else 
-                Log.Error($"{Url}, status code: {response.StatusCode} Content: {response.Content}");
+                HTTPHandler.HttpHandler.RequestCounter();
+                return response;
+            }
+            switch (response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.TooManyRequests:
+                    RateLimitExceeded(response, httpMethod, Url, body, headers);
+                    break;
+                default:
+                    Log.Error($"{Url}, status code: {response.StatusCode} Content: {response.Content}");
+                    break;
+            }
+            
 
             HTTPHandler.HttpHandler.RequestCounter();
             return response;
@@ -68,6 +82,14 @@ namespace BotFramework
             requestsInLast60Seconds++;
             await Task.Delay(60000);
             requestsInLast60Seconds--;
+        }
+
+        /// <summary>
+        /// called if a HTTP 429 response is returned
+        /// </summary>
+        private static void RateLimitExceeded(HttpResponseMessage response, HttpMethod httpMethod, string Url, StringContent? body = null, Header[]? headers = null)
+        {
+
         }
 
     }

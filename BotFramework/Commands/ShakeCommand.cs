@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
+using Logging;
 
 namespace BotFramework.Commands
 {

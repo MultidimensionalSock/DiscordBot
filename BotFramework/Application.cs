@@ -3,6 +3,7 @@ using BotFramework.Structures;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.Text.Json;
+using Logging; 
 
 namespace BotFramework
 {
