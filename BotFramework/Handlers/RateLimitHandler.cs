@@ -22,14 +22,14 @@ namespace BotFramework
                 {
                     _instance = new();
                 }
-                return Instance;
+                return _instance;
             }
         }
 
         private SQLiteConnection _connection;
         public bool GlobalRateLimitReached => requestsInLast60Seconds > 60;
         private int requestsInLast60Seconds;
-        private List<HTTPRequest> _activeRequests;
+        private List<HTTPRequest> _activeRequests = new();
         
 
         public void AddRequest(HTTPRequest request)
@@ -49,11 +49,11 @@ namespace BotFramework
 
         }
 
-        public bool EndpointRateLimitReached(Uri requestUri)
+        public (bool rateLimitReached, DateTime resetTime) EndpointRateLimitReached(HttpRequestMessage request)
         {
             //check rate limit logs 
             //check if endpoint has been called before and get bucket info 
-            return true;
+            return (true, DateTime.Now.AddDays(1));
         }
 
         public void ReadRateLimitInformation()
@@ -70,21 +70,22 @@ namespace BotFramework
 
         public void CreateTable()
         {
-            string LogTable = @"
+            string RateLimitTable = @"
                     CREATE TABLE IF NOT EXISTS RateLimits (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                    RequestID INTEGER NOT NULL,
                     Limit INTEGER NOT NULL,
                     Remaining INTEGER NOT NULL, 
                     Reset TEXT NOT NULL,
                     ResetAfter INT NOT NULL, 
-                    Bucket TEXT NOT NULL
+                    Bucket TEXT NOT NULL,
                     Global BOOL, 
                     Scope TEXT NOT NULL
                 );"
             ;
-
             try
             {
-                SQLiteCommand command = new SQLiteCommand(LogTable, _connection);
+                SQLiteCommand command = new SQLiteCommand(RateLimitTable, _connection);
                 command.ExecuteNonQuery();
                 Log.Debug("Database Created");
                 Console.WriteLine("Database table created");

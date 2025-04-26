@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using Logging;
+using BotFramework.Handlers;
 
 namespace BotFramework.Commands
 {
@@ -34,7 +35,7 @@ namespace BotFramework.Commands
             {
                 URL = $"https://discord.com/api/v10/applications/{Application.Id}/commands/{commandId}";
             }
-            return await HTTPHandler.SendRequest(HttpMethod.Get, URL);
+            return await new HTTPRequest(HTTPRequest.CreateHTTPMessage(HttpMethod.Get, URL), 10, 2).SendHTTPMessage(); 
 
         }
 
@@ -57,7 +58,7 @@ namespace BotFramework.Commands
             {
                 URL = $"https://discord.com/api/v10/applications/{Application.Id}/commands";
             }
-            return await HTTPHandler.SendRequest(HttpMethod.Post, URL, jsonContent);
+            return await new HTTPRequest(HTTPRequest.CreateHTTPMessage(HttpMethod.Post, URL), 10, 2).SendHTTPMessage();
         }
 
         /// <summary>
@@ -66,9 +67,8 @@ namespace BotFramework.Commands
         public virtual async Task RespondToInteraction(string interactionId, string interactionToken, StringContent content)
         {
             string URL = $"https://discord.com/api/v10/interactions/{interactionId}/{interactionToken}/callback";
-
-            await HTTPHandler.SendRequest(HttpMethod.Post, URL, content);
+            HttpResponseMessage response = await new HTTPRequest(HTTPRequest.CreateHTTPMessage(HttpMethod.Post, URL, content), 30, 2).SendHTTPMessage();
+            Console.WriteLine(response);
         }
-
     }
 }

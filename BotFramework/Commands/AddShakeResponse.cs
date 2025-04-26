@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
 using Logging;
+using BotFramework.Handlers;
 
 namespace BotFramework.Commands
 {
@@ -101,7 +102,7 @@ namespace BotFramework.Commands
             {
                 URL = $"https://discord.com/api/v10/applications/{Application.Id}/commands";
             }
-            return await HTTPHandler.SendRequest(HttpMethod.Post, URL, jsonContent);
+            return await new HTTPRequest(HTTPRequest.CreateHTTPMessage(HttpMethod.Post, URL, jsonContent), 10, 2).SendHTTPMessage();
         }
     }
 }

@@ -3,7 +3,8 @@ using BotFramework.Structures;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.Text.Json;
-using Logging; 
+using Logging;
+using BotFramework.Handlers;
 
 namespace BotFramework
 {
@@ -15,7 +16,6 @@ namespace BotFramework
         public static Log Logger;
 
         public static Application? BotRef;
-        public HTTPHandler? HttpHandler;
         public GatewayHandler? GatewayHandler;
 
         public static List<Command> BotCommands = new();
@@ -34,7 +34,6 @@ namespace BotFramework
             HttpClient httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(10) };
             ClientWebSocket webSocketClient = new ClientWebSocket();
 
-            HttpHandler = new HTTPHandler(httpClient);
             GatewayHandler = new GatewayHandler(webSocketClient);
 
             GatewayHandler?.Connect();
@@ -49,8 +48,9 @@ namespace BotFramework
 
             try
             {
-                response = await HTTPHandler.SendRequest(HttpMethod.Get,
-                    $"https://discord.com/api/v10/applications/{Id}/commands", null);
+                response = await new HTTPRequest(
+                    HTTPRequest.CreateHTTPMessage(HttpMethod.Get, $"https://discord.com/api/v10/applications/{Id}/commands", null),
+                    30, 2).SendHTTPMessage();
                 if (response.IsSuccessStatusCode)
                 {
                     using JsonDocument doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());

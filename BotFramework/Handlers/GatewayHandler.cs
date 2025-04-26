@@ -4,6 +4,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using Logging;
+using BotFramework.Handlers;
 
 namespace BotFramework
 {
@@ -27,7 +28,9 @@ namespace BotFramework
 
         public async Task Connect()
         {
-            using (HttpResponseMessage response = await HTTPHandler.SendUnauthRequest(HttpMethod.Get, "https://discord.com/api/v10/gateway"))
+            using (HttpResponseMessage response = await new HTTPRequest(
+                HTTPRequest.CreateHTTPMessage(HttpMethod.Get, "https://discord.com/api/v10/gateway"), 20, 3)
+                .SendHTTPMessage())
             {
                 try
                 {
@@ -77,9 +80,6 @@ namespace BotFramework
             {
                 Log.Error(e.Message);
             }
-
-
-
         }
 
         public async Task RecieveMessages()
